@@ -1,0 +1,94 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: db_sqlserver
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      SA_PASSWORD: "${DB_SQLSERVER_PASSWORD:-SqlServerPass123}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - db_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: db_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_MYSQL_ROOT_PASSWORD:-MysqlRootPass123}"
+      MYSQL_DATABASE: app_database
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: "${DB_MYSQL_PASSWORD:-MysqlUserPass123}"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - db_network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: db_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: "${DB_POSTGRES_USER:-db_user}"
+      POSTGRES_PASSWORD: "${DB_POSTGRES_PASSWORD:-PostgresPass123}"
+      POSTGRES_DB: app_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  oracle:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: db_oracle
+    restart: always
+    environment:
+      ORACLE_PASSWORD: "${DB_ORACLE_PASSWORD:-OraclePass123}"
+      APP_USER: db_user
+      APP_USER_PASSWORD: "${DB_ORACLE_APP_USER_PASSWORD:-OracleAppPass123}"
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+    networks:
+      - db_network
+
+  mongo:
+    image: mongo:6.0
+    container_name: db_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${DB_MONGO_ROOT_USERNAME:-admin}"
+      MONGO_INITDB_ROOT_PASSWORD: "${DB_MONGO_ROOT_PASSWORD:-MongoPass123}"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - db_network
+
+volumes:
+  sqlserver_data:
+    driver: local
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  oracle_data:
+    driver: local
+  mongo_data:
+    driver: local
+
+networks:
+  db_network:
+    driver: bridge
